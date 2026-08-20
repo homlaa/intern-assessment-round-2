@@ -1,4 +1,4 @@
 # Intern Assessment — Round 2
 
 ## Progress
-_No entries yet._
+_Checkpoint: baseline verified by reviewer._
