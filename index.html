@@ -110,7 +110,7 @@
                 `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
             );
             const newdata = await dataresponse.json();
-            return { name, ...newdata.current_weather };
+            return { name, latitude, longitude, ...newdata.current_weather };
         }
 
         document.getElementById('savebutton').addEventListener('click', async () => {
@@ -131,6 +131,21 @@
                 document.getElementById('temperature').textContent = data.temperature;
                 document.getElementById('windspeed').textContent = data.windspeed;
                 weatherdata.style.display = 'block';
+                const response = await fetch('/api/attendees', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name: document.getElementById('firstname').value.trim(),
+                        last_name: document.getElementById('lastname').value.trim(),
+                        birthdate: document.getElementById('birthdate').value,
+                        city: data.name,
+                        latitude: data.latitude,
+                        longitude: data.longitude
+                    })
+                });
+                const saved = await response.json();
+                console.log('Saved attendee:', saved);
+
             } catch (err) {
                 errormessage.textContent = err.message || 'did not fetch weather data.';
             }
@@ -147,4 +162,5 @@
         });
     </script>
 </body>
+
 </html>
