@@ -15,6 +15,10 @@ const weatherEl = document.getElementById("weather");
 const temperatureEl = document.getElementById("temperature");
 const windspeedEl = document.getElementById("windspeed");
 const resultEl = document.getElementById("result");
+const resultNameEl = document.getElementById("result-name");
+const resultCityEl = document.getElementById("result-city");
+const resultCoordsEl = document.getElementById("result-coords");
+const weatherNoteEl = document.getElementById("weather-note");
 const clearBtn = document.getElementById("clear-btn");
 
 let selectedCity = null;
@@ -24,16 +28,34 @@ function setStatus(message, type = "") {
   statusEl.className = `status ${type}`.trim();
 }
 
-function showWeather({ temperature, windspeed }) {
+function showWeather({ temperature, windspeed }, note = "") {
   temperatureEl.textContent = `${temperature} °C`;
   windspeedEl.textContent = `${windspeed} km/h`;
+  weatherNoteEl.textContent = note;
+  weatherNoteEl.hidden = !note;
   weatherEl.hidden = false;
 }
 
 function hideWeather() {
   weatherEl.hidden = true;
+  weatherNoteEl.hidden = true;
+  weatherNoteEl.textContent = "";
   temperatureEl.textContent = "—";
   windspeedEl.textContent = "—";
+}
+
+function showResult(saved) {
+  resultNameEl.textContent = `${saved.first_name} ${saved.last_name}`;
+  resultCityEl.textContent = saved.city_name;
+  resultCoordsEl.textContent = `${saved.latitude}, ${saved.longitude}`;
+  resultEl.hidden = false;
+}
+
+function hideResult() {
+  resultEl.hidden = true;
+  resultNameEl.textContent = "—";
+  resultCityEl.textContent = "—";
+  resultCoordsEl.textContent = "—";
 }
 
 function validateForm() {
@@ -111,6 +133,8 @@ async function handleCitySelection() {
     return;
   }
 
+  setStatus("Looking up city…");
+
   try {
     const location = await geocodeCity(cityName);
     const weather = await fetchWeather(location.latitude, location.longitude);
@@ -127,7 +151,10 @@ async function handleCitySelection() {
           FALLBACK_WEATHER.latitude,
           FALLBACK_WEATHER.longitude
         );
-        showWeather(fallbackWeather);
+        showWeather(
+          fallbackWeather,
+          "City was not found. Weather below is a separate check that the forecast API still works."
+        );
       } catch (weatherError) {
         hideWeather();
       }
@@ -141,7 +168,7 @@ async function handleCitySelection() {
 
 async function handleSave(event) {
   event.preventDefault();
-  resultEl.hidden = true;
+  hideResult();
 
   const validationError = validateForm();
   if (validationError) {
@@ -180,10 +207,7 @@ async function handleSave(event) {
 
     const saved = payload.attendee;
     setStatus("Registration saved.", "ok");
-    resultEl.hidden = false;
-    resultEl.textContent =
-      `${saved.first_name} ${saved.last_name} — ${saved.city_name} ` +
-      `(${saved.latitude}, ${saved.longitude})`;
+    showResult(saved);
   } catch (error) {
     setStatus(error.message || "Could not save registration.", "error");
   }
@@ -193,7 +217,7 @@ function handleClear() {
   form.reset();
   selectedCity = null;
   hideWeather();
-  resultEl.hidden = true;
+  hideResult();
   setStatus("");
 }
 
