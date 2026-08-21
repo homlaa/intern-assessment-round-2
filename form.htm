@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Form</title>
+</head>
+<body>
+    <h2>Registration Form</h2>
+    <form id="form">
+        First Name: <input type="text" id="firstName"><br><br>
+        Last Name: <input type="text" id="lastName"><br><br>
+        Birthdate: <input type="date" id="birthdate"><br><br>
+        City: <input type="text" id="city"><br><br>
+        <button type="submit">Save</button>
+        <button type="button" id="clearBtn">Clear</button>
+    </form>
+
+    <p id="status"></p>
+    <p id="temp"></p>
+    <p id="wind"></p>
+
+    <script>
+        let lat = null;
+        let lon = null;
+        let found = false;
+
+        async function getCityWeather() {
+            let city = document.getElementById("city").value;
+
+            try {
+                let geoRes = await fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + city);
+                let geo = await geoRes.json();
+
+                if (!geo.results || geo.results.length == 0) {
+                    document.getElementById("status").innerText = "City not found";
+                    found = false;
+                    // still call weather with a valid city so that call can succeed
+                    lat = 52.52;
+                    lon = 13.41;
+                } else {
+                    lat = geo.results[0].latitude;
+                    lon = geo.results[0].longitude;
+                    found = true;
+                    document.getElementById("status").innerText = "City found";
+                }
+            } catch (err) {
+                document.getElementById("status").innerText = "geocoding error";
+                return;
+            }
+
+            try {
+                let weatherRes = await fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true");
+                let weather = await weatherRes.json();
+                document.getElementById("temp").innerText = "Temperature: " + weather.current_weather.temperature;
+                document.getElementById("wind").innerText = "Windspeed: " + weather.current_weather.windspeed;
+            } catch (err) {
+                document.getElementById("status").innerText = "weather error";
+            }
+        }
+
+        document.getElementById("city").onchange = function () {
+            getCityWeather();
+        };
+
+        document.getElementById("form").onsubmit = async function (e) {
+            e.preventDefault();
+
+            let firstName = document.getElementById("firstName").value;
+            let lastName = document.getElementById("lastName").value;
+            let birthdate = document.getElementById("birthdate").value;
+            let city = document.getElementById("city").value;
+
+            if (firstName == "" || lastName == "" || birthdate == "" || city == "") {
+                document.getElementById("status").innerText = "All fields are required";
+                return;
+            }
+
+            await getCityWeather();
+
+            if (!found) {
+                document.getElementById("status").innerText = "City not found";
+                return;
+            }
+
+            try {
+                let res = await fetch("http://localhost:3000/api/attendees", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        firstName: firstName,
+                        lastName: lastName,
+                        birthdate: birthdate,
+                        city: city,
+                        latitude: lat,
+                        longitude: lon
+                    })
+                });
+                let data = await res.json();
+                if (res.ok) {
+                    document.getElementById("status").innerText = "Saved";
+                    console.log(data);
+                } else {
+                    document.getElementById("status").innerText = "save failed";
+                }
+            } catch (err) {
+                document.getElementById("status").innerText = "save error - start the server with npm start";
+            }
+        };
+
+        document.getElementById("clearBtn").onclick = function () {
+            document.getElementById("form").reset();
+            document.getElementById("status").innerText = "";
+            document.getElementById("temp").innerText = "";
+            document.getElementById("wind").innerText = "";
+            lat = null;
+            lon = null;
+            found = false;
+        };
+    </script>
+</body>
+</html>
