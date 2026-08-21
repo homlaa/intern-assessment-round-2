@@ -1,39 +1,42 @@
 const express = require("express");
-const initSqlJs = require("sql.js");
+const sqlite3 = require("sqlite3").verbose();
 
 const app = express();
 app.use(express.json());
+
+app.use(function (req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+
+const db = new sqlite3.Database("./database.db");
+
+db.run(`CREATE TABLE IF NOT EXISTS city_information (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  latitude REAL,
+  longitude REAL
+)`);
+
+db.run(`CREATE TABLE IF NOT EXISTS personal_information (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  first_name TEXT,
+  last_name TEXT,
+  birthdate TEXT,
+  city_id INTEGER
+)`);
 
 app.get("/", function (req, res) {
   res.sendFile(__dirname + "/form.htm");
 });
 
-let db;
-
-async function start() {
-  if (db) return;
-  const SQL = await initSqlJs();
-  db = new SQL.Database();
-
-  db.run(`CREATE TABLE city_information (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    latitude REAL,
-    longitude REAL
-  )`);
-
-  db.run(`CREATE TABLE personal_information (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name TEXT,
-    last_name TEXT,
-    birthdate TEXT,
-    city_id INTEGER
-  )`);
-}
-
-app.post("/api/attendees", async function (req, res) {
-  await start();
-
+app.post("/api/attendees", function (req, res) {
   let firstName = req.body.firstName;
   let lastName = req.body.lastName;
   let birthdate = req.body.birthdate;
@@ -41,59 +44,73 @@ app.post("/api/attendees", async function (req, res) {
   let latitude = req.body.latitude;
   let longitude = req.body.longitude;
 
-  if (!firstName || !lastName || !birthdate || !city || latitude == null || longitude == null) {
+  if (!firstName || !lastName || !birthdate || !city || !latitude || !longitude) {
     res.status(400).json({ error: "All fields are required" });
     return;
   }
 
-  db.run("INSERT INTO city_information (name, latitude, longitude) VALUES (?, ?, ?)", [
-    city,
-    latitude,
-    longitude,
-  ]);
-  let cityId = db.exec("SELECT last_insert_rowid()")[0].values[0][0];
-
   db.run(
-    "INSERT INTO personal_information (first_name, last_name, birthdate, city_id) VALUES (?, ?, ?, ?)",
-    [firstName, lastName, birthdate, cityId]
+    "INSERT INTO city_information (name, latitude, longitude) VALUES (?, ?, ?)",
+    [city, latitude, longitude],
+    function (err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+
+      let cityId = this.lastID;
+
+      db.run(
+        "INSERT INTO personal_information (first_name, last_name, birthdate, city_id) VALUES (?, ?, ?, ?)",
+        [firstName, lastName, birthdate, cityId],
+        function (err) {
+          if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+          }
+
+          let id = this.lastID;
+          let joinQuery =
+            "SELECT p.first_name, p.last_name, c.name, c.latitude, c.longitude FROM personal_information p JOIN city_information c ON p.city_id = c.id WHERE p.id = ?";
+
+          db.get(joinQuery, [id], function (err, row) {
+            if (err) {
+              res.status(500).json({ error: err.message });
+              return;
+            }
+
+            res.json({
+              id: id,
+              joinQuery: joinQuery,
+              joinResult: row,
+            });
+          });
+        }
+      );
+    }
   );
-  let id = db.exec("SELECT last_insert_rowid()")[0].values[0][0];
-
-  let joinQuery =
-    "SELECT p.first_name, p.last_name, c.name, c.latitude, c.longitude FROM personal_information p JOIN city_information c ON p.city_id = c.id WHERE p.id = " +
-    id;
-
-  let joinResult = db.exec(joinQuery);
-
-  res.json({
-    id: id,
-    joinQuery: joinQuery,
-    joinResult: joinResult,
-  });
 });
 
-app.patch("/api/attendees/:id", async function (req, res) {
-  await start();
-
+app.patch("/api/attendees/:id", function (req, res) {
   let id = req.params.id;
   let birthdate = req.body.birthdate;
 
-  let rows = db.exec("SELECT * FROM personal_information WHERE id = " + id);
-  if (rows.length == 0) {
-    res.status(404).json({ error: "Attendee not found" });
-    return;
-  }
+  db.get("SELECT * FROM personal_information WHERE id = ?", [id], function (err, row) {
+    if (!row) {
+      res.status(404).json({ error: "Attendee not found" });
+      return;
+    }
 
-  db.run("UPDATE personal_information SET birthdate = ? WHERE id = ?", [birthdate, id]);
-  res.json({ message: "updated" });
+    db.run("UPDATE personal_information SET birthdate = ? WHERE id = ?", [birthdate, id], function (err) {
+      res.json({ message: "updated" });
+    });
+  });
 });
 
 if (require.main === module) {
-  start().then(function () {
-    app.listen(3000, function () {
-      console.log("running on port 3000");
-    });
+  app.listen(3000, function () {
+    console.log("server running on port 3000");
   });
 }
 
-module.exports = { app, start };
+module.exports = app;
