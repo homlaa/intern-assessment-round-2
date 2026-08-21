@@ -2,3 +2,4 @@
 
 ## Progress
 Started by Nyumbayire Laurent, Round 2 
+_Checkpoint: baseline verified by reviewer._
