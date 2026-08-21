@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Attendee Registration</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>Attendee Registration</h1>
+
+      <p class="introduction">
+        Enter your personal information and city.
+      </p>
+
+      <form id="registration-form" novalidate>
+        <div class="form-group">
+          <label for="first-name">First Name</label>
+
+          <input
+            id="first-name"
+            name="firstName"
+            type="text"
+            autocomplete="given-name"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="last-name">Last Name</label>
+
+          <input
+            id="last-name"
+            name="lastName"
+            type="text"
+            autocomplete="family-name"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="birthdate">Birthdate</label>
+
+          <input
+            id="birthdate"
+            name="birthdate"
+            type="date"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="city">City</label>
+
+          <input
+            id="city"
+            name="city"
+            type="text"
+            autocomplete="address-level2"
+            required
+          >
+        </div>
+
+        <div class="buttons">
+          <button id="save-button" type="submit">
+            Save
+          </button>
+
+          <button class="secondary" type="reset">
+            Clear
+          </button>
+        </div>
+      </form>
+
+      <p
+        id="status"
+        class="status"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+      <section
+        id="weather"
+        class="weather"
+        aria-live="polite"
+        hidden
+      >
+        <h2>Current Weather</h2>
+
+        <p>
+          City:
+          <strong id="weather-city"></strong>
+        </p>
+
+        <p>
+          Temperature:
+          <strong id="temperature"></strong>
+        </p>
+
+        <p>
+          Windspeed:
+          <strong id="windspeed"></strong>
+        </p>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
