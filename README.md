@@ -1,4 +1,4 @@
 # Intern Assessment — Round 2
 
 ## Progress
-_No entries yet._
+Started by Joshua Akintemi, Round 2.
