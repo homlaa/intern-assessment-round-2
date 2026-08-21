@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Registration</title>
+    <style>
+        body {
+            max-width: 420px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+        }
+
+        input {
+            width: 100%;
+            margin-top: 4px;
+            box-sizing: border-box;
+        }
+
+        input.error {
+            border-color: red;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            padding: 8px 20px;
+            cursor: pointer;
+        }
+
+        #savebutton {
+            background: #0073bb;
+            color: #fff;
+        }
+
+        #clearbutton {
+            background: #eee;
+        }
+
+        #weather {
+            margin-top: 20px;
+            padding: 12px;
+            display: none;
+        }
+
+        #errormessage {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <p>registration</p>
+    <form>
+        <label>First Name
+            <input type="text" id="firstname" />
+        </label>
+        <label>Last Name
+            <input type="text" id="lastname" />
+        </label>
+        <label>Birthdate
+            <input type="date" id="birthdate" />
+        </label>
+        <label>City
+            <input type="text" id="city" />
+        </label>
+        <div class="buttons">
+            <button type="button" id="savebutton">Save</button>
+            <button type="button" id="clearbutton">Clear</button>
+        </div>
+        <div id="errormessage"></div>
+    </form>
+
+    <div id="weather">
+        <strong id="weathercity"></strong>
+        <p>Temperature: <span id="temperature"></span>-degree C</p>
+        <p>Wind Speed: <span id="windspeed"></span> km/h</p>
+    </div>
+
+    <script>
+        const fields = ['firstname', 'lastname', 'birthdate', 'city'];
+
+        function validate() {
+            let valid = true;
+            fields.forEach(id => {
+                const realdata = document.getElementById(id);
+                const empty = !realdata.value.trim();
+                realdata.classList.toggle('error', empty);
+                if (empty) valid = false;
+            });
+            return valid;
+        }
+
+        async function weather(city) {
+            const geographyresponse = await fetch(
+                `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`
+            );
+            const geographydata = await geographyresponse.json();
+            if (!geographydata.results?.length) throw new Error(`City "${city}" not found.`);
+
+            const { latitude, longitude, name } = geographydata.results[0];
+            const dataresponse = await fetch(
+                `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+            );
+            const newdata = await dataresponse.json();
+            return { name, ...newdata.current_weather };
+        }
+
+        document.getElementById('savebutton').addEventListener('click', async () => {
+            const errormessage = document.getElementById('errormessage');
+            const weatherdata = document.getElementById('weather');
+            errormessage.textContent = '';
+            weatherdata.style.display = 'none';
+
+            if (!validate()) {
+                errormessage.textContent = 'Every Field is required.';
+                return;
+            }
+
+            try {
+                const city = document.getElementById('city').value.trim();
+                const data = await weather(city);
+                document.getElementById('weathercity').textContent = data.name;
+                document.getElementById('temperature').textContent = data.temperature;
+                document.getElementById('windspeed').textContent = data.windspeed;
+                weatherdata.style.display = 'block';
+            } catch (err) {
+                errormessage.textContent = err.message || 'did not fetch weather data.';
+            }
+        });
+
+        document.getElementById('clearbutton').addEventListener('click', () => {
+            fields.forEach(id => {
+                const realdata = document.getElementById(id);
+                realdata.value = '';
+                realdata.classList.remove('error');
+            });
+            document.getElementById('errormessage').textContent = '';
+            document.getElementById('weather').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
