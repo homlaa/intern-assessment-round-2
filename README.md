@@ -1,4 +1,5 @@
 # Intern Assessment — Round 2
 
 ## Progress
-_No entries yet._
+Started
+by Princesse, Round 2.
