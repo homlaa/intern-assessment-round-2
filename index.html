@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendee Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Attendee Registration</h1>
+
+        <form id="registrationForm">
+
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" name="firstName">
+                <small class="error" id="firstNameError"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" name="lastName">
+                <small class="error" id="lastNameError"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="birthdate">Birthdate</label>
+                <input type="date" id="birthdate" name="birthdate">
+                <small class="error" id="birthdateError"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city">
+                <small class="error" id="cityError"></small>
+            </div>
+
+            <div id="weather"></div>
+
+            <div class="buttons">
+                <button type="submit">Save</button>
+                <button type="button" id="clearButton">Clear</button>
+            </div>
+
+            <p id="status"></p>
+
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
