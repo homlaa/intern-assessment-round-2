@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendee Registration</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="card">
+      <header class="header">
+        <p class="eyebrow">Round 2</p>
+        <h1>Attendee Registration</h1>
+        <p class="subtitle">
+          Fill in your details. Weather loads automatically after you enter a city.
+        </p>
+      </header>
+
+      <form id="registration-form" novalidate>
+        <div class="field-row">
+          <label for="first-name">
+            First Name
+            <input
+              type="text"
+              id="first-name"
+              name="firstName"
+              autocomplete="given-name"
+              placeholder="Mugisha"
+              required
+            />
+          </label>
+
+          <label for="last-name">
+            Last Name
+            <input
+              type="text"
+              id="last-name"
+              name="lastName"
+              autocomplete="family-name"
+              placeholder="Pacifique"
+              required
+            />
+          </label>
+        </div>
+
+        <label for="birthdate">
+          Birthdate
+          <input type="date" id="birthdate" name="birthdate" required />
+        </label>
+
+        <label for="city">
+          City
+          <input
+            type="text"
+            id="city"
+            name="city"
+            autocomplete="address-level2"
+            placeholder="e.g. Kigali"
+            required
+          />
+          <span class="hint">Press Tab or click outside the box to look up weather.</span>
+        </label>
+
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+
+        <section id="weather" class="weather" hidden>
+          <h2>Current weather</h2>
+          <div class="weather-grid">
+            <div class="metric">
+              <span class="metric-label">Temperature</span>
+              <span id="temperature" class="metric-value">—</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Wind speed</span>
+              <span id="windspeed" class="metric-value">—</span>
+            </div>
+          </div>
+          <p id="weather-note" class="weather-note" hidden></p>
+        </section>
+
+        <div class="actions">
+          <button type="submit" id="save-btn">Save</button>
+          <button type="button" id="clear-btn">Clear</button>
+        </div>
+      </form>
+
+      <section id="result" class="result" hidden>
+        <h2>Saved attendee</h2>
+        <dl>
+          <div>
+            <dt>Name</dt>
+            <dd id="result-name">—</dd>
+          </div>
+          <div>
+            <dt>City</dt>
+            <dd id="result-city">—</dd>
+          </div>
+          <div>
+            <dt>Coordinates</dt>
+            <dd id="result-coords">—</dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
