@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendee Registration</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>Attendee Registration</h1>
+      <p class="subtitle">Enter your details. Weather is loaded when a city is selected.</p>
+
+      <form id="registration-form" novalidate>
+        <label>
+          First Name
+          <input type="text" id="first-name" name="firstName" autocomplete="given-name" required />
+        </label>
+
+        <label>
+          Last Name
+          <input type="text" id="last-name" name="lastName" autocomplete="family-name" required />
+        </label>
+
+        <label>
+          Birthdate
+          <input type="date" id="birthdate" name="birthdate" required />
+        </label>
+
+        <label>
+          City
+          <input
+            type="text"
+            id="city"
+            name="city"
+            autocomplete="address-level2"
+            placeholder="e.g. Kigali"
+            required
+          />
+        </label>
+
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+
+        <section id="weather" class="weather" hidden>
+          <h2>Current weather</h2>
+          <p><strong>Temperature:</strong> <span id="temperature">—</span></p>
+          <p><strong>Wind speed:</strong> <span id="windspeed">—</span></p>
+        </section>
+
+        <div class="actions">
+          <button type="submit" id="save-btn">Save</button>
+          <button type="button" id="clear-btn">Clear</button>
+        </div>
+      </form>
+
+      <p id="result" class="result" hidden></p>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

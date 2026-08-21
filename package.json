@@ -1,0 +1,18 @@
+{
+  "name": "intern-assessment-round-2",
+  "version": "1.0.0",
+  "description": "Attendee registration app with weather lookup, SQLite, and REST APIs.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test tests/attendees.test.js"
+  },
+  "private": true,
+  "dependencies": {
+    "express": "^4.21.2",
+    "sql.js": "^1.12.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}
